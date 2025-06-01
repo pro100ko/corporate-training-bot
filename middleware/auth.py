@@ -1,7 +1,7 @@
 import logging
 from typing import Any, Awaitable, Callable, Dict
 from aiogram import BaseMiddleware
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import TelegramObject
 from database import DatabaseManager
 from config import ADMIN_IDS
 
@@ -12,8 +12,8 @@ class AuthMiddleware(BaseMiddleware):
     
     async def __call__(
         self,
-        handler: Callable[[Message, Dict[str, Any]], Awaitable[Any]],
-        event: Message | CallbackQuery,
+        handler: Callable[[TelegramObject, Dict[str, Any]], Awaitable[Any]],
+        event: TelegramObject,
         data: Dict[str, Any]
     ) -> Any:
         """Process authentication and authorization"""
