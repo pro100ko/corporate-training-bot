@@ -35,6 +35,9 @@ async def get_session():
 class DatabaseManager:
     """Database manager for common operations"""
     
+    # Make AsyncSessionLocal accessible as class attribute
+    AsyncSessionLocal = AsyncSessionLocal
+    
     @staticmethod
     async def get_or_create_user(telegram_id: int, username: Optional[str] = None, 
                                first_name: Optional[str] = None, last_name: Optional[str] = None, 
