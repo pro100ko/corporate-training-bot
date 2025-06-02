@@ -16,8 +16,12 @@ class SearchStates(StatesGroup):
 async def search_products_handler(query: types.CallbackQuery, state: FSMContext, **kwargs):
     """Handle search products menu"""
     text = (
-        "🔍 **Search Products**\n\n"
-        "Enter keywords to search for products:"
+        "🔍 **Поиск продуктов**\n\n"
+        "💬 Введите название продукта:\n\n"
+        "📝 Вы можете искать по:\n"
+        "• Названию продукта\n"
+        "• Ключевым словам в описании\n\n"
+        "Введите ваш поисковый запрос:"
     )
     
     await MessageHelper.safe_edit_message(
@@ -33,11 +37,11 @@ async def search_products_handler(query: types.CallbackQuery, state: FSMContext,
 async def search_query_handler(message: types.Message, state: FSMContext, **kwargs):
     """Handle search query input"""
     try:
-        query_text = message.text.strip()
+        query_text = message.text.strip() if message.text else ""
         
         if len(query_text) < 2:
             await message.answer(
-                "⚠️ Search query too short. Please enter at least 2 characters."
+                "⚠️ Слишком короткий запрос. Введите минимум 2 символа."
             )
             return
         
@@ -48,9 +52,9 @@ async def search_query_handler(message: types.Message, state: FSMContext, **kwar
         
         if not products:
             text = (
-                f"🔍 **Search Results**\n\n"
-                f"No products found for: '{query_text}'\n\n"
-                "Try using different keywords or browse categories instead."
+                f"🔍 **Результаты поиска**\n\n"
+                f"Не найдено продуктов по запросу: '{query_text}'\n\n"
+                "Попробуйте использовать другие ключевые слова или просмотрите категории."
             )
             
             from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -58,21 +62,21 @@ async def search_query_handler(message: types.Message, state: FSMContext, **kwar
             
             builder.row(
                 types.InlineKeyboardButton(
-                    text="📚 Browse Categories",
+                    text="📚 Просмотр категорий",
                     callback_data="knowledge_base"
                 )
             )
             
             builder.row(
                 types.InlineKeyboardButton(
-                    text="🔍 Search Again",
+                    text="🔍 Искать снова",
                     callback_data="search_products"
                 )
             )
             
             builder.row(
                 types.InlineKeyboardButton(
-                    text="🏠 Main Menu",
+                    text="🏠 Главное меню",
                     callback_data="main_menu"
                 )
             )
@@ -85,9 +89,9 @@ async def search_query_handler(message: types.Message, state: FSMContext, **kwar
             return
         
         text = (
-            f"🔍 **Search Results**\n\n"
-            f"Found {len(products)} product(s) for: '{query_text}'\n\n"
-            "Select a product to view:"
+            f"🔍 **Результаты поиска**\n\n"
+            f"Найдено {len(products)} продуктов по запросу: '{query_text}'\n\n"
+            "Выберите продукт для просмотра:"
         )
         
         from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -103,14 +107,14 @@ async def search_query_handler(message: types.Message, state: FSMContext, **kwar
         
         builder.row(
             types.InlineKeyboardButton(
-                text="🔍 Search Again",
+                text="🔍 Искать снова",
                 callback_data="search_products"
             )
         )
         
         builder.row(
             types.InlineKeyboardButton(
-                text="🏠 Main Menu",
+                text="🏠 Главное меню",
                 callback_data="main_menu"
             )
         )
@@ -123,7 +127,7 @@ async def search_query_handler(message: types.Message, state: FSMContext, **kwar
         
     except Exception as e:
         logger.error(f"Error in search_query_handler: {e}")
-        await message.answer("❌ Error processing search. Please try again.")
+        await message.answer("❌ Ошибка обработки поиска. Попробуйте снова.")
         await state.clear()
 
 @router.callback_query(lambda c: c.data.startswith("search_result:"))
@@ -137,7 +141,8 @@ async def search_result_handler(query: types.CallbackQuery, **kwargs):
             from sqlalchemy import text
             result = await session.execute(
                 text("""
-                SELECT p.id, p.name, p.description, p.image_file_id, p.document_file_id, c.name as category_name
+                SELECT p.id, p.name, p.description, p.image_file_id, p.document_file_id, 
+                       c.name as category_name, c.id as category_id
                 FROM products p 
                 LEFT JOIN categories c ON p.category_id = c.id 
                 WHERE p.id = :product_id
@@ -149,7 +154,7 @@ async def search_result_handler(query: types.CallbackQuery, **kwargs):
         if not product:
             await MessageHelper.safe_answer_callback(
                 query, 
-                "Product not found.", 
+                "Продукт не найден.", 
                 show_alert=True
             )
             return
@@ -161,7 +166,7 @@ async def search_result_handler(query: types.CallbackQuery, **kwargs):
         text = MessageHelper.format_product_info(product, product.category_name)
         
         if has_test:
-            text += f"\n📝 Test available ({len(questions)} questions)"
+            text += f"\n📝 Доступен тест ({len(questions)} вопросов)"
         
         # Create keyboard with search-specific back button
         from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -170,21 +175,21 @@ async def search_result_handler(query: types.CallbackQuery, **kwargs):
         if has_test:
             builder.row(
                 types.InlineKeyboardButton(
-                    text="📝 Take Test",
+                    text="📝 Пройти тест",
                     callback_data=f"start_test:{product_id}"
                 )
             )
         
         builder.row(
             types.InlineKeyboardButton(
-                text="🔍 Search Again",
+                text="🔍 Искать снова",
                 callback_data="search_products"
             )
         )
         
         builder.row(
             types.InlineKeyboardButton(
-                text="🏠 Main Menu",
+                text="🏠 Главное меню",
                 callback_data="main_menu"
             )
         )
@@ -228,13 +233,13 @@ async def search_result_handler(query: types.CallbackQuery, **kwargs):
         logger.error(f"Invalid product ID in search_result_handler: {e}")
         await MessageHelper.safe_answer_callback(
             query, 
-            "Invalid product. Please try again.", 
+            "Неверный продукт. Попробуйте снова.", 
             show_alert=True
         )
     except Exception as e:
         logger.error(f"Error in search_result_handler: {e}")
         await MessageHelper.safe_answer_callback(
             query, 
-            "Error loading product. Please try again.", 
+            "Ошибка загрузки продукта. Попробуйте снова.", 
             show_alert=True
         )
