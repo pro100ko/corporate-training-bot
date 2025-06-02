@@ -40,8 +40,11 @@ if not DATABASE_URL:
     # Use SQLite for local development
     DATABASE_URL = "sqlite+aiosqlite:///corporate_bot.db"
 elif DATABASE_URL.startswith("postgresql://"):
-    # Convert PostgreSQL URL for async support
+    # Convert PostgreSQL URL for async support and handle SSL properly
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+    # Replace sslmode parameter with proper asyncpg format
+    if "?sslmode=require" in DATABASE_URL:
+        DATABASE_URL = DATABASE_URL.replace("?sslmode=require", "")
 
 print(f"[CONFIG] Using PORT={PORT}, WEBHOOK_URL={WEBHOOK_URL}")
 print(f"[CONFIG] Admin IDs: {ADMIN_IDS}")
