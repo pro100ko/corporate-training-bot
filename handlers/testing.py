@@ -24,16 +24,16 @@ async def take_test_menu(query: types.CallbackQuery, **kwargs):
         
         if not categories:
             text = (
-                "📝 **Take Test**\n\n"
-                "No test categories available yet.\n"
-                "Please contact an administrator to add tests."
+                "📝 **Пройти тест**\n\n"
+                "Категории тестов пока недоступны.\n"
+                "Обратитесь к администратору для добавления тестов."
             )
             
             from aiogram.utils.keyboard import InlineKeyboardBuilder
             builder = InlineKeyboardBuilder()
             builder.row(
                 types.InlineKeyboardButton(
-                    text="🔙 Back to Main",
+                    text="🔙 В главное меню",
                     callback_data="main_menu"
                 )
             )
@@ -47,8 +47,8 @@ async def take_test_menu(query: types.CallbackQuery, **kwargs):
             return
         
         text = (
-            "📝 **Take Test**\n\n"
-            "Choose a category to start testing:"
+            "📝 **Пройти тест**\n\n"
+            "Выберите категорию для прохождения теста:"
         )
         
         keyboard = Keyboards.categories_list(categories, "test_category")
@@ -64,7 +64,7 @@ async def take_test_menu(query: types.CallbackQuery, **kwargs):
         logger.error(f"Error in take_test_menu: {e}")
         await MessageHelper.safe_answer_callback(
             query, 
-            "Error loading test menu. Please try again.", 
+            "Ошибка загрузки меню тестов. Попробуйте снова.", 
             show_alert=True
         )
 
@@ -93,16 +93,16 @@ async def test_category_handler(query: types.CallbackQuery, **kwargs):
         
         if not products:
             text = (
-                "📝 **No Tests Available**\n\n"
-                "No test questions are available for products in this category yet.\n"
-                "Please try another category or contact an administrator."
+                "📝 **Тесты недоступны**\n\n"
+                "В этой категории пока нет вопросов для тестирования.\n"
+                "Попробуйте другую категорию или обратитесь к администратору."
             )
             
             from aiogram.utils.keyboard import InlineKeyboardBuilder
             builder = InlineKeyboardBuilder()
             builder.row(
                 types.InlineKeyboardButton(
-                    text="🔙 Back to Categories",
+                    text="🔙 К категориям",
                     callback_data="take_test"
                 )
             )
@@ -116,8 +116,8 @@ async def test_category_handler(query: types.CallbackQuery, **kwargs):
             return
         
         text = (
-            "📝 **Select Product Test**\n\n"
-            "Choose a product to take the test:"
+            "📝 **Выберите тест продукта**\n\n"
+            "Выберите продукт для прохождения теста:"
         )
         
         from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -126,14 +126,14 @@ async def test_category_handler(query: types.CallbackQuery, **kwargs):
         for product in products:
             builder.row(
                 types.InlineKeyboardButton(
-                    text=f"📝 {product.name} ({product.question_count} questions)",
+                    text=f"📝 {product.name} ({product.question_count} вопросов)",
                     callback_data=f"start_test:{product.id}"
                 )
             )
         
         builder.row(
             types.InlineKeyboardButton(
-                text="🔙 Back to Categories",
+                text="🔙 К категориям",
                 callback_data="take_test"
             )
         )
@@ -149,14 +149,14 @@ async def test_category_handler(query: types.CallbackQuery, **kwargs):
         logger.error(f"Invalid category ID in test_category_handler: {e}")
         await MessageHelper.safe_answer_callback(
             query, 
-            "Invalid category. Please try again.", 
+            "Неверная категория. Попробуйте снова.", 
             show_alert=True
         )
     except Exception as e:
         logger.error(f"Error in test_category_handler: {e}")
         await MessageHelper.safe_answer_callback(
             query, 
-            "Error loading tests. Please try again.", 
+            "Ошибка загрузки тестов. Попробуйте снова.", 
             show_alert=True
         )
 
@@ -172,7 +172,7 @@ async def start_test_handler(query: types.CallbackQuery, state: FSMContext, user
         if not questions:
             await MessageHelper.safe_answer_callback(
                 query, 
-                "No questions available for this test.", 
+                "Для этого теста нет доступных вопросов.", 
                 show_alert=True
             )
             return
@@ -197,14 +197,14 @@ async def start_test_handler(query: types.CallbackQuery, state: FSMContext, user
         logger.error(f"Invalid product ID in start_test_handler: {e}")
         await MessageHelper.safe_answer_callback(
             query, 
-            "Invalid product. Please try again.", 
+            "Неверный продукт. Попробуйте снова.", 
             show_alert=True
         )
     except Exception as e:
         logger.error(f"Error in start_test_handler: {e}")
         await MessageHelper.safe_answer_callback(
             query, 
-            "Error starting test. Please try again.", 
+            "Ошибка запуска теста. Попробуйте снова.", 
             show_alert=True
         )
 
@@ -215,7 +215,7 @@ async def show_question(query: types.CallbackQuery, session_key: str):
         if not session:
             await MessageHelper.safe_answer_callback(
                 query, 
-                "Test session expired. Please start a new test.", 
+                "Сессия теста истекла. Начните новый тест.", 
                 show_alert=True
             )
             return
@@ -231,13 +231,13 @@ async def show_question(query: types.CallbackQuery, session_key: str):
         question = questions[current_idx]
         
         text = (
-            f"📝 **Question {current_idx + 1}/{len(questions)}**\n\n"
+            f"📝 **Вопрос {current_idx + 1}/{len(questions)}**\n\n"
             f"❓ {question.question}\n\n"
             f"🔘 A) {question.option_a}\n"
             f"🔘 B) {question.option_b}\n"
             f"🔘 C) {question.option_c}\n"
             f"🔘 D) {question.option_d}\n\n"
-            "Choose your answer:"
+            "Выберите ваш ответ:"
         )
         
         keyboard = Keyboards.test_question(
@@ -257,7 +257,7 @@ async def show_question(query: types.CallbackQuery, session_key: str):
         logger.error(f"Error in show_question: {e}")
         await MessageHelper.safe_answer_callback(
             query, 
-            "Error displaying question. Please try again.", 
+            "Ошибка отображения вопроса. Попробуйте снова.", 
             show_alert=True
         )
 
@@ -274,7 +274,7 @@ async def answer_handler(query: types.CallbackQuery, state: FSMContext, **kwargs
         if not session_key or session_key not in test_sessions:
             await MessageHelper.safe_answer_callback(
                 query, 
-                "Test session expired. Please start a new test.", 
+                "Сессия теста истекла. Начните новый тест.", 
                 show_alert=True
             )
             return
@@ -304,7 +304,7 @@ async def answer_handler(query: types.CallbackQuery, state: FSMContext, **kwargs
         session['current_question'] += 1
         
         # Show feedback and continue
-        feedback = "✅ Correct!" if is_correct else f"❌ Incorrect. The correct answer was {current_question.correct_answer}."
+        feedback = "✅ Правильно!" if is_correct else f"❌ Неправильно. Правильный ответ: {current_question.correct_answer}."
         await MessageHelper.safe_answer_callback(query, feedback, show_alert=False)
         
         # Show next question or complete test
@@ -314,14 +314,14 @@ async def answer_handler(query: types.CallbackQuery, state: FSMContext, **kwargs
         logger.error(f"Invalid answer format in answer_handler: {e}")
         await MessageHelper.safe_answer_callback(
             query, 
-            "Invalid answer format. Please try again.", 
+            "Неверный формат ответа. Попробуйте снова.", 
             show_alert=True
         )
     except Exception as e:
         logger.error(f"Error in answer_handler: {e}")
         await MessageHelper.safe_answer_callback(
             query, 
-            "Error processing answer. Please try again.", 
+            "Ошибка обработки ответа. Попробуйте снова.", 
             show_alert=True
         )
 
@@ -360,21 +360,21 @@ async def complete_test(query: types.CallbackQuery, session_key: str):
         
         builder.row(
             types.InlineKeyboardButton(
-                text="🔄 Take Another Test",
+                text="🔄 Пройти другой тест",
                 callback_data="take_test"
             )
         )
         
         builder.row(
             types.InlineKeyboardButton(
-                text="📊 View My Results",
+                text="📊 Мои результаты",
                 callback_data="my_results"
             )
         )
         
         builder.row(
             types.InlineKeyboardButton(
-                text="🏠 Main Menu",
+                text="🏠 Главное меню",
                 callback_data="main_menu"
             )
         )
@@ -390,7 +390,7 @@ async def complete_test(query: types.CallbackQuery, session_key: str):
         logger.error(f"Error in complete_test: {e}")
         await MessageHelper.safe_answer_callback(
             query, 
-            "Error completing test. Please try again.", 
+            "Ошибка завершения теста. Попробуйте снова.", 
             show_alert=True
         )
 
@@ -416,22 +416,22 @@ async def my_results_handler(query: types.CallbackQuery, user=None, **kwargs):
         
         if not results:
             text = (
-                "📊 **My Results**\n\n"
-                "You haven't taken any tests yet.\n"
-                "Take your first test to see results here!"
+                "📊 **Мои результаты**\n\n"
+                "Вы еще не проходили тесты.\n"
+                "Пройдите первый тест, чтобы увидеть результаты здесь!"
             )
         else:
             text = (
-                f"📊 **My Results**\n\n"
-                f"Recent test results (showing last {len(results)}):\n\n"
+                f"📊 **Мои результаты**\n\n"
+                f"Результаты последних тестов (показано {len(results)}):\n\n"
             )
             
             for i, result in enumerate(results, 1):
                 date_str = result.completed_at.strftime("%Y-%m-%d %H:%M")
                 text += (
                     f"{i}. **{result.product_name}**\n"
-                    f"   Score: {result.score:.1f}% ({result.correct_answers}/{result.total_questions})\n"
-                    f"   Date: {date_str}\n\n"
+                    f"   Балл: {result.score:.1f}% ({result.correct_answers}/{result.total_questions})\n"
+                    f"   Дата: {date_str}\n\n"
                 )
         
         from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -440,14 +440,14 @@ async def my_results_handler(query: types.CallbackQuery, user=None, **kwargs):
         if results:
             builder.row(
                 types.InlineKeyboardButton(
-                    text="🔄 Take Another Test",
+                    text="🔄 Пройти еще тест",
                     callback_data="take_test"
                 )
             )
         
         builder.row(
             types.InlineKeyboardButton(
-                text="🏠 Main Menu",
+                text="🏠 Главное меню",
                 callback_data="main_menu"
             )
         )
@@ -463,6 +463,6 @@ async def my_results_handler(query: types.CallbackQuery, user=None, **kwargs):
         logger.error(f"Error in my_results_handler: {e}")
         await MessageHelper.safe_answer_callback(
             query, 
-            "Error loading results. Please try again.", 
+            "Ошибка загрузки результатов. Попробуйте снова.", 
             show_alert=True
         )
