@@ -19,7 +19,7 @@ class AuthMiddleware(BaseMiddleware):
         """Process authentication and authorization"""
         
         # Get user info from event
-        user_info = event.from_user
+        user_info = getattr(event, 'from_user', None)
         if not user_info:
             return await handler(event, data)
         
@@ -60,15 +60,15 @@ def admin_required(func):
             if hasattr(message_or_query, 'answer'):
                 # It's a Message
                 await message_or_query.answer(
-                    "❌ You don't have permission to perform this action.\n"
-                    "This feature is restricted to administrators only."
+                    "❌ У вас нет разрешения на выполнение этого действия.\n"
+                    "Эта функция доступна только администраторам."
                 )
             else:
                 # It's a CallbackQuery
                 from utils.helpers import MessageHelper
                 await MessageHelper.safe_answer_callback(
                     message_or_query,
-                    "❌ Access denied. Admin privileges required.",
+                    "❌ Доступ запрещен. Требуются права администратора.",
                     show_alert=True
                 )
             return
