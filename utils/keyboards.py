@@ -12,28 +12,28 @@ class Keyboards:
         
         builder.row(
             InlineKeyboardButton(
-                text="📚 Knowledge Base",
+                text="📚 База знаний",
                 callback_data="knowledge_base"
             )
         )
         
         builder.row(
             InlineKeyboardButton(
-                text="🔍 Search Products",
+                text="🔍 Поиск продуктов",
                 callback_data="search_products"
             )
         )
         
         builder.row(
             InlineKeyboardButton(
-                text="📝 Take Test",
+                text="📝 Пройти тест",
                 callback_data="take_test"
             )
         )
         
         builder.row(
             InlineKeyboardButton(
-                text="📊 My Results",
+                text="📊 Мои результаты",
                 callback_data="my_results"
             )
         )
@@ -41,7 +41,7 @@ class Keyboards:
         if is_admin:
             builder.row(
                 InlineKeyboardButton(
-                    text="⚙️ Admin Panel",
+                    text="⚙️ Панель администратора",
                     callback_data="admin_panel"
                 )
             )
@@ -55,35 +55,35 @@ class Keyboards:
         
         builder.row(
             InlineKeyboardButton(
-                text="📁 Manage Categories",
+                text="📁 Управление категориями",
                 callback_data="admin_categories"
             )
         )
         
         builder.row(
             InlineKeyboardButton(
-                text="📦 Manage Products",
+                text="📦 Управление продуктами",
                 callback_data="admin_products"
             )
         )
         
         builder.row(
             InlineKeyboardButton(
-                text="❓ Manage Questions",
+                text="❓ Управление тестами",
                 callback_data="admin_questions"
             )
         )
         
         builder.row(
             InlineKeyboardButton(
-                text="📊 Statistics",
+                text="📊 Статистика",
                 callback_data="admin_stats"
             )
         )
         
         builder.row(
             InlineKeyboardButton(
-                text="🔙 Back to Main",
+                text="🔙 В главное меню",
                 callback_data="main_menu"
             )
         )
@@ -105,7 +105,7 @@ class Keyboards:
         
         builder.row(
             InlineKeyboardButton(
-                text="🔙 Back to Main",
+                text="🔙 В главное меню",
                 callback_data="main_menu"
             )
         )
@@ -128,24 +128,32 @@ class Keyboards:
         return builder.as_markup()
     
     @staticmethod
-    def product_actions(product_id: int, has_test: bool = False) -> InlineKeyboardMarkup:
+    def product_actions(product_id: int, has_test: bool = False, category_id: int = None) -> InlineKeyboardMarkup:
         """Product actions keyboard"""
         builder = InlineKeyboardBuilder()
         
         if has_test:
             builder.row(
                 InlineKeyboardButton(
-                    text="📝 Take Test",
+                    text="📝 Пройти тест",
                     callback_data=f"start_test:{product_id}"
                 )
             )
         
-        builder.row(
-            InlineKeyboardButton(
-                text="🔙 Back",
-                callback_data="back_to_products"
+        if category_id:
+            builder.row(
+                InlineKeyboardButton(
+                    text="🔙 К продуктам",
+                    callback_data=f"view_category:{category_id}"
+                )
             )
-        )
+        else:
+            builder.row(
+                InlineKeyboardButton(
+                    text="🔙 К категориям",
+                    callback_data="knowledge_base"
+                )
+            )
         
         return builder.as_markup()
     
@@ -166,7 +174,7 @@ class Keyboards:
         # Progress info (non-clickable)
         builder.row(
             InlineKeyboardButton(
-                text=f"📊 Question {current_question}/{total_questions}",
+                text=f"📊 Вопрос {current_question}/{total_questions}",
                 callback_data="noop"
             )
         )
@@ -180,18 +188,18 @@ class Keyboards:
         
         builder.row(
             InlineKeyboardButton(
-                text="✏️ Edit",
+                text="✏️ Редактировать",
                 callback_data=f"edit_category:{category_id}"
             ),
             InlineKeyboardButton(
-                text="🗑️ Delete",
+                text="🗑️ Удалить",
                 callback_data=f"delete_category:{category_id}"
             )
         )
         
         builder.row(
             InlineKeyboardButton(
-                text="🔙 Back",
+                text="🔙 К категориям",
                 callback_data="admin_categories"
             )
         )
@@ -205,18 +213,18 @@ class Keyboards:
         
         builder.row(
             InlineKeyboardButton(
-                text="✏️ Edit",
+                text="✏️ Редактировать",
                 callback_data=f"edit_product:{product_id}"
             ),
             InlineKeyboardButton(
-                text="🗑️ Delete",
+                text="🗑️ Удалить",
                 callback_data=f"delete_product:{product_id}"
             )
         )
         
         builder.row(
             InlineKeyboardButton(
-                text="🔙 Back",
+                text="🔙 К продуктам",
                 callback_data="admin_products"
             )
         )
@@ -230,11 +238,11 @@ class Keyboards:
         
         builder.row(
             InlineKeyboardButton(
-                text="✅ Confirm",
+                text="✅ Подтвердить",
                 callback_data=f"confirm:{action_data}"
             ),
             InlineKeyboardButton(
-                text="❌ Cancel",
+                text="❌ Отмена",
                 callback_data="cancel"
             )
         )
