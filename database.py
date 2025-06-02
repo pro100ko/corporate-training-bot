@@ -8,8 +8,22 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
-# Create async engine
-engine = create_async_engine(DATABASE_URL, echo=False)
+# Create async engine with proper configuration
+if DATABASE_URL.startswith("postgresql"):
+    # For PostgreSQL with asyncpg, handle SSL properly
+    engine = create_async_engine(
+        DATABASE_URL,
+        echo=False,
+        pool_pre_ping=True,
+        connect_args={"ssl": "require"}
+    )
+else:
+    # For SQLite
+    engine = create_async_engine(
+        DATABASE_URL,
+        echo=False,
+        pool_pre_ping=True
+    )
 
 # Create async session factory
 AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
