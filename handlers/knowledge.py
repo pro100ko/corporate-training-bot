@@ -15,16 +15,16 @@ async def knowledge_base_handler(query: types.CallbackQuery, **kwargs):
         
         if not categories:
             text = (
-                "📚 **Knowledge Base**\n\n"
-                "No categories available yet.\n"
-                "Please contact an administrator to add content."
+                "📚 **База знаний**\n\n"
+                "Категории пока недоступны.\n"
+                "Обратитесь к администратору для добавления контента."
             )
             
             from aiogram.utils.keyboard import InlineKeyboardBuilder
             builder = InlineKeyboardBuilder()
             builder.row(
                 types.InlineKeyboardButton(
-                    text="🔙 Back to Main",
+                    text="🔙 В главное меню",
                     callback_data="main_menu"
                 )
             )
@@ -38,8 +38,8 @@ async def knowledge_base_handler(query: types.CallbackQuery, **kwargs):
             return
         
         text = (
-            "📚 **Knowledge Base**\n\n"
-            f"Browse {len(categories)} categories of products and information:"
+            "📚 **База знаний**\n\n"
+            f"Просматривайте {len(categories)} категорий продуктов и информации:"
         )
         
         keyboard = Keyboards.categories_list(categories, "view_category")
@@ -55,7 +55,7 @@ async def knowledge_base_handler(query: types.CallbackQuery, **kwargs):
         logger.error(f"Error in knowledge_base_handler: {e}")
         await MessageHelper.safe_answer_callback(
             query, 
-            "Error loading knowledge base. Please try again.", 
+            "Ошибка загрузки базы знаний. Попробуйте снова.", 
             show_alert=True
         )
 
@@ -72,7 +72,7 @@ async def view_category_handler(query: types.CallbackQuery, **kwargs):
         if not category:
             await MessageHelper.safe_answer_callback(
                 query, 
-                "Category not found.", 
+                "Категория не найдена.", 
                 show_alert=True
             )
             return
@@ -88,7 +88,7 @@ async def view_category_handler(query: types.CallbackQuery, **kwargs):
             text += f"📄 {category.description}\n\n"
         
         if products:
-            text += f"Products ({len(products)}):"
+            text += f"Продукты ({len(products)}):"
             
             from aiogram.utils.keyboard import InlineKeyboardBuilder
             builder = InlineKeyboardBuilder()
@@ -103,7 +103,7 @@ async def view_category_handler(query: types.CallbackQuery, **kwargs):
             
             builder.row(
                 types.InlineKeyboardButton(
-                    text="🔙 Back to Categories",
+                    text="🔙 К категориям",
                     callback_data="knowledge_base"
                 )
             )
@@ -115,13 +115,13 @@ async def view_category_handler(query: types.CallbackQuery, **kwargs):
                 parse_mode="Markdown"
             )
         else:
-            text += "No products available in this category yet."
+            text += "В этой категории пока нет продуктов."
             
             from aiogram.utils.keyboard import InlineKeyboardBuilder
             builder = InlineKeyboardBuilder()
             builder.row(
                 types.InlineKeyboardButton(
-                    text="🔙 Back to Categories",
+                    text="🔙 К категориям",
                     callback_data="knowledge_base"
                 )
             )
@@ -137,14 +137,14 @@ async def view_category_handler(query: types.CallbackQuery, **kwargs):
         logger.error(f"Invalid category ID in view_category_handler: {e}")
         await MessageHelper.safe_answer_callback(
             query, 
-            "Invalid category. Please try again.", 
+            "Неверная категория. Попробуйте снова.", 
             show_alert=True
         )
     except Exception as e:
         logger.error(f"Error in view_category_handler: {e}")
         await MessageHelper.safe_answer_callback(
             query, 
-            "Error loading category. Please try again.", 
+            "Ошибка загрузки категории. Попробуйте снова.", 
             show_alert=True
         )
 
@@ -159,7 +159,8 @@ async def view_product_handler(query: types.CallbackQuery, **kwargs):
             from sqlalchemy import text
             result = await session.execute(
                 text("""
-                SELECT p.id, p.name, p.description, p.image_file_id, p.document_file_id, c.name as category_name
+                SELECT p.id, p.name, p.description, p.image_file_id, p.document_file_id, 
+                       c.name as category_name, c.id as category_id
                 FROM products p 
                 LEFT JOIN categories c ON p.category_id = c.id 
                 WHERE p.id = :product_id
@@ -171,7 +172,7 @@ async def view_product_handler(query: types.CallbackQuery, **kwargs):
         if not product:
             await MessageHelper.safe_answer_callback(
                 query, 
-                "Product not found.", 
+                "Продукт не найден.", 
                 show_alert=True
             )
             return
@@ -183,7 +184,7 @@ async def view_product_handler(query: types.CallbackQuery, **kwargs):
         text = MessageHelper.format_product_info(product, product.category_name)
         
         if has_test:
-            text += f"\n📝 Test available ({len(questions)} questions)"
+            text += f"\n📝 Доступен тест ({len(questions)} вопросов)"
         
         # Send image/document if available
         if product.image_file_id:
@@ -191,7 +192,7 @@ async def view_product_handler(query: types.CallbackQuery, **kwargs):
                 await query.message.answer_photo(
                     photo=product.image_file_id,
                     caption=text,
-                    reply_markup=Keyboards.product_actions(product_id, has_test),
+                    reply_markup=Keyboards.product_actions(product_id, has_test, product.category_id),
                     parse_mode="Markdown"
                 )
                 await MessageHelper.safe_answer_callback(query)
@@ -204,7 +205,7 @@ async def view_product_handler(query: types.CallbackQuery, **kwargs):
                 await query.message.answer_document(
                     document=product.document_file_id,
                     caption=text,
-                    reply_markup=Keyboards.product_actions(product_id, has_test),
+                    reply_markup=Keyboards.product_actions(product_id, has_test, product.category_id),
                     parse_mode="Markdown"
                 )
                 await MessageHelper.safe_answer_callback(query)
@@ -216,7 +217,7 @@ async def view_product_handler(query: types.CallbackQuery, **kwargs):
         await MessageHelper.safe_edit_message(
             query,
             text=text,
-            reply_markup=Keyboards.product_actions(product_id, has_test),
+            reply_markup=Keyboards.product_actions(product_id, has_test, product.category_id),
             parse_mode="Markdown"
         )
         
@@ -224,14 +225,14 @@ async def view_product_handler(query: types.CallbackQuery, **kwargs):
         logger.error(f"Invalid product ID in view_product_handler: {e}")
         await MessageHelper.safe_answer_callback(
             query, 
-            "Invalid product. Please try again.", 
+            "Неверный продукт. Попробуйте снова.", 
             show_alert=True
         )
     except Exception as e:
         logger.error(f"Error in view_product_handler: {e}")
         await MessageHelper.safe_answer_callback(
             query, 
-            "Error loading product. Please try again.", 
+            "Ошибка загрузки продукта. Попробуйте снова.", 
             show_alert=True
         )
 
