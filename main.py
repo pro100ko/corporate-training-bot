@@ -64,7 +64,7 @@ async def error_handler(event, exception):
     if hasattr(event, 'message') and event.message:
         try:
             await event.message.answer(
-                "❌ An unexpected error occurred. Please try again or contact support."
+                "❌ Произошла неожиданная ошибка. Попробуйте снова или обратитесь в поддержку."
             )
         except Exception as e:
             logger.error(f"Failed to send error message: {e}")
@@ -75,11 +75,12 @@ async def error_handler(event, exception):
 @dp.message()
 async def fallback_handler(message: types.Message, **kwargs):
     """Fallback handler for unhandled messages"""
-    logger.info(f"Unhandled message from {message.from_user.id if message.from_user else 'unknown'}: {message.text}")
+    user_id = message.from_user.id if message.from_user else 0
+    logger.info(f"Unhandled message from user {user_id}: {message.text}")
     
     text = (
-        "🤔 I don't understand this command.\n\n"
-        "Use /start to see available options or choose from the menu below:"
+        "🤔 Я не понимаю эту команду.\n\n"
+        "Используйте /start чтобы увидеть доступные опции или выберите из меню ниже:"
     )
     
     from utils.keyboards import Keyboards
@@ -92,12 +93,13 @@ async def fallback_handler(message: types.Message, **kwargs):
 @dp.callback_query()
 async def fallback_callback_handler(query: types.CallbackQuery, **kwargs):
     """Fallback handler for unhandled callbacks"""
-    logger.info(f"Unhandled callback from {query.from_user.id if query.from_user else 'unknown'}: {query.data}")
+    user_id = query.from_user.id if query.from_user else 0
+    logger.info(f"Unhandled callback from user {user_id}: {query.data}")
     
     from utils.helpers import MessageHelper
     await MessageHelper.safe_answer_callback(
         query, 
-        "❌ This action is not available. Please try again.", 
+        "❌ Это действие недоступно. Попробуйте снова.", 
         show_alert=True
     )
 
