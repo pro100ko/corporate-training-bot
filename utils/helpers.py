@@ -47,7 +47,7 @@ class MessageHelper:
                 pass  # Fail silently if both attempts fail
 
     @staticmethod
-    async def safe_answer_callback(query: CallbackQuery, text: str = None, show_alert: bool = False):
+    async def safe_answer_callback(query: CallbackQuery, text: str = "", show_alert: bool = False):
         """Safely answer callback query"""
         try:
             await query.answer(text=text, show_alert=show_alert)
@@ -60,10 +60,10 @@ class MessageHelper:
         text = f"📦 **{product.name}**\n\n"
         
         if category_name:
-            text += f"📁 Category: {category_name}\n"
+            text += f"📁 Категория: {category_name}\n"
         
         if product.description:
-            text += f"📄 Description: {product.description}\n"
+            text += f"📄 Описание: {product.description}\n"
         
         return text
 
@@ -72,22 +72,22 @@ class MessageHelper:
         """Format test result for display"""
         if score >= 80:
             emoji = "🎉"
-            status = "Excellent!"
+            status = "Отлично!"
         elif score >= 60:
             emoji = "👍"
-            status = "Good job!"
+            status = "Хорошо!"
         elif score >= 40:
             emoji = "📚"
-            status = "Keep studying!"
+            status = "Продолжайте учиться!"
         else:
             emoji = "💪"
-            status = "Practice more!"
+            status = "Нужно больше практики!"
         
         return (
-            f"{emoji} **Test Complete!**\n\n"
-            f"📊 Score: {score:.1f}%\n"
-            f"✅ Correct: {correct}/{total}\n"
-            f"📈 Status: {status}"
+            f"{emoji} **Тест завершен!**\n\n"
+            f"📊 Результат: {score:.1f}%\n"
+            f"✅ Правильно: {correct}/{total}\n"
+            f"📈 Статус: {status}"
         )
 
     @staticmethod
@@ -102,29 +102,41 @@ class ValidationHelper:
     @staticmethod
     def is_valid_category_name(name: str) -> bool:
         """Validate category name"""
+        if not name:
+            return False
         return 2 <= len(name.strip()) <= 100
     
     @staticmethod
     def is_valid_product_name(name: str) -> bool:
         """Validate product name"""
+        if not name:
+            return False
         return 2 <= len(name.strip()) <= 255
     
     @staticmethod
     def is_valid_description(description: str) -> bool:
         """Validate description"""
+        if not description:
+            return True
         return len(description.strip()) <= 2000
     
     @staticmethod
     def is_valid_question(question: str) -> bool:
         """Validate test question"""
+        if not question:
+            return False
         return 10 <= len(question.strip()) <= 1000
     
     @staticmethod
     def is_valid_option(option: str) -> bool:
         """Validate test option"""
+        if not option:
+            return False
         return 1 <= len(option.strip()) <= 500
     
     @staticmethod
     def is_valid_answer(answer: str) -> bool:
         """Validate correct answer"""
+        if not answer:
+            return False
         return answer.upper() in ['A', 'B', 'C', 'D']
