@@ -11,23 +11,23 @@ logger = logging.getLogger(__name__)
 async def start_handler(message: types.Message, user=None, is_admin: bool = False, **kwargs):
     """Handle /start command"""
     user_id = message.from_user.id if message.from_user else 0
-    first_name = message.from_user.first_name if message.from_user else "User"
+    first_name = message.from_user.first_name if message.from_user else "Пользователь"
     
     logger.info(f"Start command from user {user_id}")
     
     welcome_text = (
-        f"👋 Welcome to the Corporate Training Bot, {first_name}!\n\n"
-        "🎯 This bot helps you:\n"
-        "• 📚 Browse our knowledge base\n"
-        "• 🔍 Search for products\n"
-        "• 📝 Take training tests\n"
-        "• 📊 Track your progress\n\n"
+        f"👋 Добро пожаловать в корпоративный бот обучения, {first_name}!\n\n"
+        "🎯 Этот бот поможет вам:\n"
+        "• 📚 Изучать базу знаний\n"
+        "• 🔍 Искать продукты\n"
+        "• 📝 Проходить тесты\n"
+        "• 📊 Отслеживать прогресс\n\n"
     )
     
     if is_admin:
-        welcome_text += "⚙️ As an administrator, you also have access to management tools.\n\n"
+        welcome_text += "⚙️ Как администратор, у вас также есть доступ к инструментам управления.\n\n"
     
-    welcome_text += "Choose an option below to get started:"
+    welcome_text += "Выберите опцию ниже, чтобы начать:"
     
     await message.answer(
         text=welcome_text,
@@ -38,8 +38,8 @@ async def start_handler(message: types.Message, user=None, is_admin: bool = Fals
 async def main_menu_callback(query: types.CallbackQuery, user=None, is_admin: bool = False, **kwargs):
     """Handle main menu callback"""
     text = (
-        "🏠 **Main Menu**\n\n"
-        "Choose an option:"
+        "🏠 **Главное меню**\n\n"
+        "Выберите опцию:"
     )
     
     await MessageHelper.safe_edit_message(
@@ -52,7 +52,7 @@ async def main_menu_callback(query: types.CallbackQuery, user=None, is_admin: bo
 @router.callback_query(lambda c: c.data == "cancel")
 async def cancel_callback(query: types.CallbackQuery, **kwargs):
     """Handle cancel callback"""
-    await MessageHelper.safe_answer_callback(query, "❌ Action cancelled")
+    await MessageHelper.safe_answer_callback(query, "❌ Действие отменено")
     
     # Return to main menu
     await main_menu_callback(query, **kwargs)
